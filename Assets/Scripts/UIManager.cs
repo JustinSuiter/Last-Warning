@@ -25,7 +25,6 @@ public class UIManager : MonoBehaviour
         
         timerText.text = string.Format("{0}:{1:00}", minutes, seconds);
         
-        // Change color based on time remaining
         if (timeRemaining <= 60f)
         {
             timerText.color = Color.red;
