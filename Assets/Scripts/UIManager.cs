@@ -8,6 +8,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI partsText;
     public TextMeshProUGUI timerText;
     public Image staminaBarFill;
+    public Image healthBarFill;
     
     
     public void UpdatePartsUI(int collected, int total)
@@ -45,6 +46,17 @@ public class UIManager : MonoBehaviour
         {
             float fillAmount = currentStamina / maxStamina;
             staminaBarFill.fillAmount = fillAmount;
+        }
+    }
+
+    // Called when player takes damage
+    public void UpdateHealthBar(float currentHealth, float maxHealth)
+    {
+        if (healthBarFill != null)
+        {
+            // Calculate fill amount (0 to 1)
+            float fillAmount = currentHealth / maxHealth;
+            healthBarFill.fillAmount = fillAmount;
         }
     }
 }

@@ -9,7 +9,6 @@ public class GameManager : MonoBehaviour
     
     void Start()
     {
-        // Find the UI Manager in the scene
         uiManager = FindFirstObjectByType<UIManager>();
         
         if (uiManager != null)
@@ -18,7 +17,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // This gets called by Collectible objects when picked up
     public void CollectPart()
     {
         partsCollected++;
@@ -41,4 +39,5 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game Over!");
         Time.timeScale = 0f;
     }
+
 }

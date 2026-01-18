@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     private float currentStamina;
     private float timeSinceStoppedSprinting = 0f;
     private bool isSprinting = false;
+    public float maxHealth = 100f;
+    public float currentHealth;
 
     public float jumpForce = 5f;
     private bool isGrounded = true;
@@ -28,21 +30,20 @@ public class PlayerController : MonoBehaviour
     
     private float verticalRotation = 0f;
     
-    // Called once when the game starts
     void Start()
     {
-        
         rb = GetComponent<Rigidbody>();
-        
-        
         playerCamera = GetComponentInChildren<Camera>();
-
+        
         uiManager = FindFirstObjectByType<UIManager>();
         
         currentStamina = maxStamina;
-    
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        currentHealth = maxHealth;
+
+        if (uiManager != null)
+        {
+            uiManager.UpdateHealthBar(currentHealth, maxHealth);
+        }
         
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -177,13 +178,41 @@ public class PlayerController : MonoBehaviour
         return maxStamina;
     }
     
-    // Check if player is touching the ground
     void OnCollisionStay(Collision collision)
     {
         
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+        }
+    }
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        currentHealth = Mathf.Max(currentHealth, 0); // Don't go below 0
+        
+        Debug.Log("Player took " + damage + " damage. Health: " + currentHealth);
+        
+        if (uiManager != null)
+        {
+            uiManager.UpdateHealthBar(currentHealth, maxHealth);
+        }
+        
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Debug.Log("Player died!");
+        
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.GameOver();
         }
     }
 }
