@@ -5,6 +5,9 @@ public class PlayerController : MonoBehaviour
     // Movement settings - these will show up in the Inspector
     public float moveSpeed = 5f;
     public float mouseSensitivity = 2f;
+
+    public float jumpForce = 5f;
+    private bool isGrounded = true;
     
     // We'll store references to components we need
     private Rigidbody rb;
@@ -30,10 +33,9 @@ public class PlayerController : MonoBehaviour
     // Called every frame
     void Update()
     {
-        // Handle camera rotation (mouse look)
         HandleMouseLook();
-        
-        // Press Escape to unlock cursor (useful for testing)
+        HandleJump(); // Add this line
+    
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
@@ -80,5 +82,26 @@ public class PlayerController : MonoBehaviour
         verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f); // Limit to prevent flipping
         
         playerCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
+    }
+
+    void HandleJump()
+    {
+        // Check if player pressed spacebar AND is on the ground
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            // Apply upward force
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = false;
+        }
+    }
+    
+    // Check if player is touching the ground
+    void OnCollisionStay(Collision collision)
+    {
+        // If we're touching something tagged as ground
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
     }
 }
