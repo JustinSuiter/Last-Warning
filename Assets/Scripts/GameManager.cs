@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // Find the UI Manager in the scene
-        uiManager = FindObjectOfType<UIManager>();
+        uiManager = FindFirstObjectByType<UIManager>();
         
         // Update the UI at the start
         if (uiManager != null)

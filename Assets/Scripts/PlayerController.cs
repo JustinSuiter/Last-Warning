@@ -6,99 +6,181 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     public float mouseSensitivity = 2f;
 
+
+    // Sprinting settings
+    public float sprintSpeed = 8f;
+    public float maxStamina = 100f;
+    public float staminaDrainRate = 20f;
+    public float staminaRegenRate = 15f;
+    public float staminaRegenDelay = 1f;
+
+    private float currentStamina;
+    private float timeSinceStoppedSprinting = 0f;
+    private bool isSprinting = false;
+
     public float jumpForce = 5f;
     private bool isGrounded = true;
     
-    // We'll store references to components we need
+    
     private Rigidbody rb;
     private Camera playerCamera;
+    private UIManager uiManager;
     
-    // Track camera rotation
     private float verticalRotation = 0f;
     
     // Called once when the game starts
     void Start()
     {
-        // Get the Rigidbody component attached to this GameObject
+        
         rb = GetComponent<Rigidbody>();
         
-        // Get the Camera that's a child of this GameObject
-        playerCamera = GetComponentInChildren<Camera>();
         
-        // Lock the cursor to the center of the screen and hide it
+        playerCamera = GetComponentInChildren<Camera>();
+
+        uiManager = FindFirstObjectByType<UIManager>();
+        
+        currentStamina = maxStamina;
+    
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
     
-    // Called every frame
+    
     void Update()
     {
         HandleMouseLook();
-        HandleJump(); // Add this line
+        HandleJump();
+        HandleStamina();
     
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (uiManager != null)
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            uiManager.UpdateStaminaBar(currentStamina, maxStamina);
         }
     }
     
-    // Called at fixed time intervals (better for physics)
+    
     void FixedUpdate()
     {
-        // Handle player movement (WASD)
+        
         HandleMovement();
     }
     
     void HandleMovement()
     {
-        // Get input from WASD or arrow keys (-1 to 1)
-        float horizontalInput = Input.GetAxis("Horizontal"); // A/D or Left/Right
-        float verticalInput = Input.GetAxis("Vertical");     // W/S or Up/Down
         
-        // Calculate movement direction relative to where player is facing
+        if (SettingsMenuController.isSettingsOpen)
+        {
+            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+            return;
+        }
+        
+        
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+        
+        
         Vector3 moveDirection = transform.forward * verticalInput + transform.right * horizontalInput;
         
-        // Normalize so diagonal movement isn't faster
+        
         moveDirection.Normalize();
         
-        // Apply movement to Rigidbody
-        Vector3 movement = moveDirection * moveSpeed;
+        
+        float currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
+        
+        
+        Vector3 movement = moveDirection * currentSpeed;
         rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
-        // Note: We keep the Y velocity so gravity still works
     }
     
     void HandleMouseLook()
     {
-        // Get mouse movement
+        
+        if (SettingsMenuController.isSettingsOpen)
+            return;
+        
+        
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
         
-        // Rotate the player left/right
+        
         transform.Rotate(0f, mouseX, 0f);
         
-        // Rotate the camera up/down
-        verticalRotation -= mouseY; // Subtract so moving mouse up looks up
-        verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f); // Limit to prevent flipping
+        
+        verticalRotation -= mouseY;
+        verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);
         
         playerCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
     }
 
     void HandleJump()
     {
-        // Check if player pressed spacebar AND is on the ground
+        
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            // Apply upward force
+            
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
         }
+    }
+
+    void HandleStamina()
+    {
+        
+        if (SettingsMenuController.isSettingsOpen)
+            return;
+        
+        
+        bool wantsToSprint = Input.GetKey(KeyCode.LeftShift);
+        
+        
+        bool isMoving = Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0;
+        
+        
+        if (wantsToSprint && isMoving && currentStamina > 0)
+        {
+            isSprinting = true;
+            
+            
+            currentStamina -= staminaDrainRate * Time.deltaTime;
+            currentStamina = Mathf.Max(currentStamina, 0);
+            
+            
+            timeSinceStoppedSprinting = 0f;
+        }
+        else
+        {
+            isSprinting = false;
+            
+            
+            timeSinceStoppedSprinting += Time.deltaTime;
+            
+            
+            if (timeSinceStoppedSprinting >= staminaRegenDelay)
+            {
+                currentStamina += staminaRegenRate * Time.deltaTime;
+                currentStamina = Mathf.Min(currentStamina, maxStamina);
+            }
+        }
+    }
+
+
+    public float GetStamina()
+    {
+        return currentStamina;
+    }
+
+    public float GetMaxStamina()
+    {
+        return maxStamina;
     }
     
     // Check if player is touching the ground
     void OnCollisionStay(Collision collision)
     {
-        // If we're touching something tagged as ground
+        
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;

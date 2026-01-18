@@ -16,8 +16,8 @@ public class TimerManager : MonoBehaviour
         timeRemaining = totalTime;
         
         // Find the managers in the scene
-        uiManager = FindObjectOfType<UIManager>();
-        gameManager = FindObjectOfType<GameManager>();
+        uiManager = FindFirstObjectByType<UIManager>();
+        gameManager = FindFirstObjectByType<GameManager>();
         
         // Update UI immediately
         if (uiManager != null)

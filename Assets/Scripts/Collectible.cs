@@ -9,7 +9,7 @@ public class Collectible : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             // Find the GameManager in the scene and tell it we were collected
-            GameManager gameManager = FindObjectOfType<GameManager>();
+            GameManager gameManager = FindFirstObjectByType<GameManager>();
             
             if (gameManager != null)
             {
