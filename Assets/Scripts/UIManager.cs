@@ -49,12 +49,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Called when player takes damage
     public void UpdateHealthBar(float currentHealth, float maxHealth)
     {
         if (healthBarFill != null)
         {
-            // Calculate fill amount (0 to 1)
             float fillAmount = currentHealth / maxHealth;
             healthBarFill.fillAmount = fillAmount;
         }

@@ -27,8 +27,10 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private Camera playerCamera;
     private UIManager uiManager;
+    private GameManager gameManager;
     
     private float verticalRotation = 0f;
+    private bool isDead = false;
     
     void Start()
     {
@@ -37,9 +39,16 @@ public class PlayerController : MonoBehaviour
         
         uiManager = FindFirstObjectByType<UIManager>();
         
+        gameManager = FindFirstObjectByType<GameManager>(); // Add this line
+        
+        if (gameManager == null)
+        {
+            Debug.LogError("GameManager not found in scene! Make sure GameManager GameObject exists.");
+        }
+        
         currentStamina = maxStamina;
         currentHealth = maxHealth;
-
+        
         if (uiManager != null)
         {
             uiManager.UpdateHealthBar(currentHealth, maxHealth);
@@ -52,6 +61,8 @@ public class PlayerController : MonoBehaviour
     
     void Update()
     {
+        if (isDead)
+        return;
         HandleMouseLook();
         HandleJump();
         HandleStamina();
@@ -65,7 +76,8 @@ public class PlayerController : MonoBehaviour
     
     void FixedUpdate()
     {
-        
+        if (isDead)
+        return;
         HandleMovement();
     }
     
@@ -190,29 +202,40 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        currentHealth = Mathf.Max(currentHealth, 0); // Don't go below 0
+        currentHealth = Mathf.Max(currentHealth, 0);
         
         Debug.Log("Player took " + damage + " damage. Health: " + currentHealth);
-        
+
         if (uiManager != null)
         {
             uiManager.UpdateHealthBar(currentHealth, maxHealth);
         }
-        
+
         if (currentHealth <= 0)
         {
-            Die();
+            Die("You were killed by a wolf!"); // Pass the wolf death message
         }
     }
 
-    void Die()
+    void Die(string reason = "You died!")
     {
-        Debug.Log("Player died!");
+        Debug.Log("=== PLAYER DIED === Reason: " + reason);
         
-        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        isDead = true;
+        
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
+        
         if (gameManager != null)
         {
-            gameManager.GameOver();
+            Debug.Log("Found GameManager, calling GameOver...");
+            gameManager.GameOver(reason);
+        }
+        else
+        {
+            Debug.LogError("GameManager NOT FOUND! Check that GameManager exists in the scene.");
         }
     }
 }

@@ -2,14 +2,16 @@ using UnityEngine;
 
 public class WolfAI : MonoBehaviour
 {
-    // Wolf behavior Settings
+    // Wolf behavior settings
     public float chaseSpeed = 4f;
     public float detectionRange = 10f;
+    public float giveUpDistance = 15f;
     
-    // Wolf attack Settings
+    // Bite/Attack settings
     public float biteDistance = 2f;
     public float biteDamage = 20f;
     public float biteCooldown = 1.5f;
+    public float attackDuration = 1f;
     
     private Transform player;
     private PlayerController playerController;
@@ -17,6 +19,8 @@ public class WolfAI : MonoBehaviour
     private Animator animator;
     private bool isChasing = false;
     private float lastBiteTime = -999f;
+    private float attackStartTime = -999f;
+    private bool isCurrentlyAttacking = false;
     
     void Start()
     {
@@ -36,20 +40,33 @@ public class WolfAI : MonoBehaviour
         if (player == null || Time.timeScale == 0f)
             return;
         
+        if (isCurrentlyAttacking && Time.time >= attackStartTime + attackDuration)
+        {
+            isCurrentlyAttacking = false;
+            if (animator != null)
+            {
+                animator.SetBool("isAttacking", false);
+            }
+        }
+        
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         
         if (distanceToPlayer <= detectionRange)
         {
             isChasing = true;
         }
+        else if (distanceToPlayer > giveUpDistance)
+        {
+            isChasing = false;
+        }
         
         if (isChasing)
         {
-            if (distanceToPlayer <= biteDistance)
+            if (distanceToPlayer <= biteDistance && !isCurrentlyAttacking)
             {
                 TryBitePlayer();
             }
-            else
+            else if (!isCurrentlyAttacking)
             {
                 ChasePlayer();
             }
@@ -61,6 +78,8 @@ public class WolfAI : MonoBehaviour
                 animator.SetBool("isRunning", false);
                 animator.SetBool("isAttacking", false);
             }
+            
+            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
         }
     }
     
@@ -92,20 +111,21 @@ public class WolfAI : MonoBehaviour
     {
         rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
         
-        if (animator != null)
-        {
-            animator.SetBool("isRunning", false);
-            animator.SetBool("isAttacking", true);
-        }
-        
         if (Time.time >= lastBiteTime + biteCooldown)
         {
+            isCurrentlyAttacking = true;
+            attackStartTime = Time.time;
+            
+            if (animator != null)
+            {
+                animator.SetBool("isRunning", false);
+                animator.SetBool("isAttacking", true);
+            }
+            
             if (playerController != null)
             {
                 playerController.TakeDamage(biteDamage);
                 lastBiteTime = Time.time;
-                
-                Debug.Log("Wolf bit player for " + biteDamage + " damage!");
             }
         }
     }
@@ -117,5 +137,8 @@ public class WolfAI : MonoBehaviour
         
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, biteDistance);
+        
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, giveUpDistance);
     }
 }
