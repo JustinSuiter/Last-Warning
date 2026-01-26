@@ -189,6 +189,12 @@ public class PlayerController : MonoBehaviour
     {
         return maxStamina;
     }
+
+    public void UseStamina(float amount)
+    {
+        currentStamina -= amount;
+        currentStamina = Mathf.Max(currentStamina, 0);
+    }
     
     void OnCollisionStay(Collision collision)
     {
