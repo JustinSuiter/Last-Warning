@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class BunkerDoorController : MonoBehaviour
 {
@@ -6,20 +7,32 @@ public class BunkerDoorController : MonoBehaviour
     public GameObject doorLight;
     public Material lockedMaterial;
     public Material unlockedMaterial;
+    public Camera cinematicCamera;
+    public Camera playerCamera;
     
     public float doorOpenHeight = 3.5f;
     public float doorOpenSpeed = 2f;
+    public float cinematicDuration = 3f;
     
     private bool isUnlocked = false;
     private bool isOpening = false;
     private bool hasEntered = false;
+    private bool cinematicPlayed = false;
     private Vector3 doorClosedPosition;
     private Vector3 doorOpenPosition;
     private GameManager gameManager;
+    private PlayerController playerController;
     
     void Start()
     {
         gameManager = FindFirstObjectByType<GameManager>();
+        
+        playerController = FindFirstObjectByType<PlayerController>();
+        
+        if (playerCamera == null)
+        {
+            playerCamera = Camera.main;
+        }
         
         if (door != null)
         {
@@ -28,6 +41,11 @@ public class BunkerDoorController : MonoBehaviour
         }
         
         UpdateLightColor(false);
+        
+        if (cinematicCamera != null)
+        {
+            cinematicCamera.enabled = false;
+        }
     }
     
     void Update()
@@ -55,11 +73,52 @@ public class BunkerDoorController : MonoBehaviour
     void UnlockDoor()
     {
         isUnlocked = true;
-        isOpening = true;
+        
+        Debug.Log("Bunker door unlocked! Playing cinematic...");
+        
+        StartCoroutine(PlayDoorCinematic());
+    }
+    
+    IEnumerator PlayDoorCinematic()
+    {
+        cinematicPlayed = true;
+        
+        if (playerController != null)
+        {
+            playerController.enabled = false; // Disables player input
+        }
+        
+        if (playerCamera != null)
+        {
+            playerCamera.enabled = false;
+        }
+        if (cinematicCamera != null)
+        {
+            cinematicCamera.enabled = true;
+        }
+        
+        yield return new WaitForSeconds(0.5f);
         
         UpdateLightColor(true);
+        isOpening = true;
         
-        Debug.Log("Bunker door unlocked and opening!");
+        yield return new WaitForSeconds(cinematicDuration);
+        
+        if (cinematicCamera != null)
+        {
+            cinematicCamera.enabled = false;
+        }
+        if (playerCamera != null)
+        {
+            playerCamera.enabled = true;
+        }
+        
+        if (playerController != null)
+        {
+            playerController.enabled = true;
+        }
+        
+        Debug.Log("Cinematic complete. Player control restored.");
     }
     
     void UpdateLightColor(bool unlocked)
