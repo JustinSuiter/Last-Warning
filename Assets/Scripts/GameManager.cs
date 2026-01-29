@@ -40,23 +40,28 @@ public class GameManager : MonoBehaviour
     
     public void GameOver(string reason)
     {
-        Debug.Log("=== GAME OVER CALLED === Reason: " + reason);
-        
         float timeSurvived = Time.time - gameStartTime;
-        
-        Debug.Log("Time survived: " + timeSurvived);
         
         if (gameOverManager != null)
         {
-            Debug.Log("Found GameOverManager, calling ShowGameOver...");
             gameOverManager.ShowGameOver(reason, partsCollected, totalPartsNeeded, timeSurvived);
-        }
-        else
-        {
-            Debug.LogError("GameOverManager NOT FOUND!");
         }
         
         Time.timeScale = 0f;
-        Debug.Log("Time.timeScale set to 0");
+    }
+
+    public void PlayerWon()
+    {
+        float timeSurvived = Time.time - gameStartTime;
+        
+        Debug.Log("Player Won! Time: " + timeSurvived);
+        
+        WinManager winManager = FindFirstObjectByType<WinManager>();
+        if (winManager != null)
+        {
+            winManager.ShowWinScreen(partsCollected, totalPartsNeeded, timeSurvived);
+        }
+        
+        Time.timeScale = 0f;
     }
 }

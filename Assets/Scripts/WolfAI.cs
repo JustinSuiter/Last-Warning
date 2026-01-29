@@ -12,6 +12,9 @@ public class WolfAI : MonoBehaviour
     public float biteDamage = 20f;
     public float biteCooldown = 1.5f;
     public float attackDuration = 1f;
+
+    public float maxHealth = 100f;
+    private float currentHealth;
     
     private Transform player;
     private PlayerController playerController;
@@ -33,6 +36,8 @@ public class WolfAI : MonoBehaviour
         
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
+
+        currentHealth = maxHealth;
     }
     
     void Update()
@@ -140,5 +145,23 @@ public class WolfAI : MonoBehaviour
         
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, giveUpDistance);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        
+        Debug.Log(gameObject.name + " took " + damage + " damage. Health: " + currentHealth);
+        
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Debug.Log(gameObject.name + " died!");
+        Destroy(gameObject);
     }
 }

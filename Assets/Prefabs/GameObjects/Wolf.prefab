@@ -198,10 +198,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79fb124305c1fac4fb4b8322dd319527, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WolfAI
-  chaseSpeed: 6
+  chaseSpeed: 7
   detectionRange: 15
   giveUpDistance: 15
   biteDistance: 2.5
   biteDamage: 20
   biteCooldown: 1.5
   attackDuration: 1
+  maxHealth: 100
