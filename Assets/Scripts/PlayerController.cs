@@ -63,6 +63,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead)
         return;
+        CheckGrounded();
         HandleMouseLook();
         HandleJump();
         HandleStamina();
@@ -196,14 +197,20 @@ public class PlayerController : MonoBehaviour
         currentStamina = Mathf.Max(currentStamina, 0);
     }
     
-    void OnCollisionStay(Collision collision)
+    void CheckGrounded()
     {
+        float rayDistance = 1.1f;
         
-        if (collision.gameObject.CompareTag("Ground"))
+        if (Physics.Raycast(transform.position, Vector3.down, rayDistance))
         {
             isGrounded = true;
         }
+        else
+        {
+            isGrounded = false;
+        }
     }
+
 
     public void TakeDamage(float damage)
     {
