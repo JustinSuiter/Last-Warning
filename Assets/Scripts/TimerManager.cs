@@ -41,10 +41,8 @@ public class TimerManager : MonoBehaviour
             
             if (gameManager != null)
             {
-                gameManager.GameOver();
+                gameManager.GameOver("The nuke detonated!");
             }
-            
-            Debug.Log("Time's up! Nuke incoming!");
         }
     }
     

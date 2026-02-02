@@ -4,13 +4,16 @@ public class GameManager : MonoBehaviour
 {
     public int partsCollected = 0;
     public int totalPartsNeeded = 5;
-    
     private UIManager uiManager;
+    private GameOverManager gameOverManager;
+    private float gameStartTime;
     
     void Start()
     {
-        // Find the UI Manager in the scene
         uiManager = FindFirstObjectByType<UIManager>();
+        gameOverManager = FindFirstObjectByType<GameOverManager>();
+        
+        gameStartTime = Time.time;
         
         if (uiManager != null)
         {
@@ -18,7 +21,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // This gets called by Collectible objects when picked up
     public void CollectPart()
     {
         partsCollected++;
@@ -36,9 +38,30 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    public void GameOver()
+    public void GameOver(string reason)
     {
-        Debug.Log("Game Over!");
+        float timeSurvived = Time.time - gameStartTime;
+        
+        if (gameOverManager != null)
+        {
+            gameOverManager.ShowGameOver(reason, partsCollected, totalPartsNeeded, timeSurvived);
+        }
+        
+        Time.timeScale = 0f;
+    }
+
+    public void PlayerWon()
+    {
+        float timeSurvived = Time.time - gameStartTime;
+        
+        Debug.Log("Player Won! Time: " + timeSurvived);
+        
+        WinManager winManager = FindFirstObjectByType<WinManager>();
+        if (winManager != null)
+        {
+            winManager.ShowWinScreen(partsCollected, totalPartsNeeded, timeSurvived);
+        }
+        
         Time.timeScale = 0f;
     }
 }
