@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     private float currentStamina;
     private float timeSinceStoppedSprinting = 0f;
     private bool isSprinting = false;
+    public float maxHealth = 100f;
+    public float currentHealth;
 
     public float jumpForce = 5f;
     private bool isGrounded = true;
@@ -25,24 +27,32 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private Camera playerCamera;
     private UIManager uiManager;
+    private GameManager gameManager;
     
     private float verticalRotation = 0f;
+    private bool isDead = false;
     
-    // Called once when the game starts
     void Start()
     {
-        
         rb = GetComponent<Rigidbody>();
-        
-        
         playerCamera = GetComponentInChildren<Camera>();
-
+        
         uiManager = FindFirstObjectByType<UIManager>();
         
+        gameManager = FindFirstObjectByType<GameManager>(); // Add this line
+        
+        if (gameManager == null)
+        {
+            Debug.LogError("GameManager not found in scene! Make sure GameManager GameObject exists.");
+        }
+        
         currentStamina = maxStamina;
-    
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        currentHealth = maxHealth;
+        
+        if (uiManager != null)
+        {
+            uiManager.UpdateHealthBar(currentHealth, maxHealth);
+        }
         
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -51,6 +61,9 @@ public class PlayerController : MonoBehaviour
     
     void Update()
     {
+        if (isDead)
+        return;
+        CheckGrounded();
         HandleMouseLook();
         HandleJump();
         HandleStamina();
@@ -64,7 +77,8 @@ public class PlayerController : MonoBehaviour
     
     void FixedUpdate()
     {
-        
+        if (isDead)
+        return;
         HandleMovement();
     }
     
@@ -176,14 +190,65 @@ public class PlayerController : MonoBehaviour
     {
         return maxStamina;
     }
-    
-    // Check if player is touching the ground
-    void OnCollisionStay(Collision collision)
+
+    public void UseStamina(float amount)
     {
+        currentStamina -= amount;
+        currentStamina = Mathf.Max(currentStamina, 0);
+    }
+    
+    void CheckGrounded()
+    {
+        float rayDistance = 1.1f;
         
-        if (collision.gameObject.CompareTag("Ground"))
+        if (Physics.Raycast(transform.position, Vector3.down, rayDistance))
         {
             isGrounded = true;
+        }
+        else
+        {
+            isGrounded = false;
+        }
+    }
+
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        currentHealth = Mathf.Max(currentHealth, 0);
+        
+        Debug.Log("Player took " + damage + " damage. Health: " + currentHealth);
+
+        if (uiManager != null)
+        {
+            uiManager.UpdateHealthBar(currentHealth, maxHealth);
+        }
+
+        if (currentHealth <= 0)
+        {
+            Die("You were killed by a wolf!"); // Pass the wolf death message
+        }
+    }
+
+    void Die(string reason = "You died!")
+    {
+        Debug.Log("=== PLAYER DIED === Reason: " + reason);
+        
+        isDead = true;
+        
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
+        
+        if (gameManager != null)
+        {
+            Debug.Log("Found GameManager, calling GameOver...");
+            gameManager.GameOver(reason);
+        }
+        else
+        {
+            Debug.LogError("GameManager NOT FOUND! Check that GameManager exists in the scene.");
         }
     }
 }

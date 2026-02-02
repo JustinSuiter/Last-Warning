@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1122954212777651713}
   - component: {fileID: 2725036584608761071}
   - component: {fileID: 6572419526367244097}
-  - component: {fileID: 7626235481184085623}
   - component: {fileID: 8287170842277780282}
   m_Layer: 0
   m_Name: BunkerPart
@@ -127,27 +126,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RotateObject
   rotationSpeed: 50
---- !u!65 &7626235481184085623
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4530695782052351213}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &8287170842277780282
 MonoBehaviour:
   m_ObjectHideFlags: 0
