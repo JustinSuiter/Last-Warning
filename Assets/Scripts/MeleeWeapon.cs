@@ -34,7 +34,6 @@ public class MeleeWeapon : MonoBehaviour
         }
         else
         {
-            // Check for attack input (left mouse button)
             if (Input.GetMouseButtonDown(0))
             {
                 TrySwing();
